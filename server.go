@@ -2,16 +2,26 @@ package main
 
 import (
 	"fmt"
-	"net/http"
-
 	"github.com/gorilla/mux"
+	"github.com/spf13/viper"
+	"net/http"
 )
 
 func main() {
 	router := mux.NewRouter()
 	go h.run()
 	router.HandleFunc("/ws", myws)
-	if err := http.ListenAndServe("127.0.0.1:8080", router); err != nil {
+
+	host := viper.GetString("web.host")
+	port := viper.GetString("web.port")
+	if host == "" {
+		host = "0.0.0.0"
+	}
+	if port == "" {
+		port = "10000"
+	}
+
+	if err := http.ListenAndServe(host+":"+port, router); err != nil {
 		fmt.Println("err:", err)
 	}
 }
