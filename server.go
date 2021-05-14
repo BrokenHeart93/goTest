@@ -22,7 +22,7 @@ func main() {
 		port = "10000"
 	}
 
-	if err := http.ListenAndServe(host+":"+port, router); err != nil {
+	if err := http.ListenAndServe(host, router); err != nil {
 		fmt.Println("err:", err)
 	}
 }
