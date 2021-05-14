@@ -19,10 +19,10 @@ func main() {
 		host = "0.0.0.0"
 	}
 	if port == "" {
-		port = "10000"
+		port = "11112"
 	}
 
-	if err := http.ListenAndServe(host, router); err != nil {
+	if err := http.ListenAndServe(host+":"+port, router); err != nil {
 		fmt.Println("err:", err)
 	}
 }
