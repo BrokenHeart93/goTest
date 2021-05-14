@@ -1,4 +1,4 @@
-package main
+package server
 
 type Data struct {
 	Ip       string   `json:"ip"`

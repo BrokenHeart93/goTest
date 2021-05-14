@@ -1,11 +1,10 @@
-package main
+package server
 
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
-
 	"github.com/gorilla/websocket"
+	"net/http"
 )
 
 type connection struct {
@@ -17,13 +16,13 @@ type connection struct {
 var wu = &websocket.Upgrader{ReadBufferSize: 512,
 	WriteBufferSize: 512, CheckOrigin: func(r *http.Request) bool { return true }}
 
-func myws(w http.ResponseWriter, r *http.Request) {
+func Myws(w http.ResponseWriter, r *http.Request) {
 	ws, err := wu.Upgrade(w, r, nil)
 	if err != nil {
 		return
 	}
 	c := &connection{sc: make(chan []byte, 256), ws: ws, data: &Data{}}
-	h.r <- c
+	H.r <- c
 	go c.writer()
 	c.reader()
 	defer func() {
@@ -32,8 +31,8 @@ func myws(w http.ResponseWriter, r *http.Request) {
 		c.data.UserList = user_list
 		c.data.Content = c.data.User
 		data_b, _ := json.Marshal(c.data)
-		h.b <- data_b
-		h.r <- c
+		H.b <- data_b
+		H.r <- c
 	}()
 }
 
@@ -50,7 +49,7 @@ func (c *connection) reader() {
 	for {
 		_, message, err := c.ws.ReadMessage()
 		if err != nil {
-			h.r <- c
+			H.r <- c
 			break
 		}
 		json.Unmarshal(message, &c.data)
@@ -61,17 +60,17 @@ func (c *connection) reader() {
 			user_list = append(user_list, c.data.User)
 			c.data.UserList = user_list
 			data_b, _ := json.Marshal(c.data)
-			h.b <- data_b
+			H.b <- data_b
 		case "user":
 			c.data.Type = "user"
 			data_b, _ := json.Marshal(c.data)
-			h.b <- data_b
+			H.b <- data_b
 		case "logout":
 			c.data.Type = "logout"
 			user_list = del(user_list, c.data.User)
 			data_b, _ := json.Marshal(c.data)
-			h.b <- data_b
-			h.r <- c
+			H.b <- data_b
+			H.r <- c
 		default:
 			fmt.Print("========default================")
 		}

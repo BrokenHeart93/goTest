@@ -5,12 +5,13 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
 	"net/http"
+	"room/server"
 )
 
 func main() {
 	router := mux.NewRouter()
-	go h.run()
-	router.HandleFunc("/ws", myws)
+	go server.H.Run()
+	router.HandleFunc("/ws", server.Myws)
 
 	host := viper.GetString("web.host")
 	port := viper.GetString("web.port")

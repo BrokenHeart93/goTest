@@ -1,8 +1,10 @@
-package main
+package server
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
-var h = hub{
+var H = hub{
 	c: make(map[*connection]bool),
 	u: make(chan *connection),
 	b: make(chan []byte),
@@ -16,27 +18,27 @@ type hub struct {
 	u chan *connection
 }
 
-func (h *hub) run() {
+func (H *hub) Run() {
 	for {
 		select {
-		case c := <-h.r:
-			h.c[c] = true
+		case c := <-H.r:
+			H.c[c] = true
 			c.data.Ip = c.ws.RemoteAddr().String()
 			c.data.Type = "handshake"
 			c.data.UserList = user_list
 			data_b, _ := json.Marshal(c.data)
 			c.sc <- data_b
-		case c := <-h.u:
-			if _, ok := h.c[c]; ok {
-				delete(h.c, c)
+		case c := <-H.u:
+			if _, ok := H.c[c]; ok {
+				delete(H.c, c)
 				close(c.sc)
 			}
-		case data := <-h.b:
-			for c := range h.c {
+		case data := <-H.b:
+			for c := range H.c {
 				select {
 				case c.sc <- data:
 				default:
-					delete(h.c, c)
+					delete(H.c, c)
 					close(c.sc)
 				}
 			}
